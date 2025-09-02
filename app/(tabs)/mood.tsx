@@ -1,6 +1,9 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
+import { db, auth } from '../../lib/firebase';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import Slider from '@react-native-community/slider';
 import { Alert, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function MoodRoute() {
@@ -25,22 +28,33 @@ export default function MoodRoute() {
       Alert.alert('Select Mood', 'Please select your current mood');
       return;
     }
-    
-    Alert.alert(
-      'Mood Recorded!',
-      'Your mood has been recorded. Would you like to create a personalized meditation plan?',
-      [
-        { text: 'Not Now', style: 'cancel' },
-        { 
-          text: 'Create Plan', 
-          onPress: () => router.push('/personalized-plan')
-        }
-      ]
-    );
+    setLoading(true);
+    addDoc(collection(db, 'moods'), {
+      userId: auth.currentUser ? auth.currentUser.uid : null,
+      mood: selectedMood,
+      stressLevel,
+      journalEntry,
+      reminderEnabled,
+      createdAt: Timestamp.now(),
+    })
+      .then(() => {
+        Alert.alert(
+          'Mood Recorded!',
+          'Your mood has been recorded. Would you like to create a personalized meditation plan?',
+          [
+            { text: 'Not Now', style: 'cancel' },
+            { text: 'Create Plan', onPress: () => router.push('/personalized-plan') }
+          ]
+        );
+      })
+      .catch((error) => {
+        Alert.alert('Error', error.message || 'Failed to record mood.');
+      })
+      .finally(() => setLoading(false));
   };
 
   const handleStressChange = (level: number) => {
-    setStressLevel(level);
+  setStressLevel(level);
   };
 
   return (
@@ -85,13 +99,17 @@ export default function MoodRoute() {
                 <Text style={styles.stressLabel}>Very Calm</Text>
                 <Text style={styles.stressLabel}>Overwhelmed</Text>
               </View>
-              <View style={styles.stressTrack}>
-                <View style={[styles.stressFill, { width: `${(stressLevel / 10) * 100}%` }]} />
-                <TouchableOpacity 
-                  style={[styles.stressThumb, { left: `${(stressLevel / 10) * 100 - 2}%` }]}
-                  onPress={() => handleStressChange(stressLevel === 10 ? 1 : stressLevel + 1)}
-                />
-              </View>
+              <Slider
+                style={{width: '100%', height: 40}}
+                minimumValue={1}
+                maximumValue={10}
+                step={1}
+                value={stressLevel}
+                minimumTrackTintColor="#8B5CF6"
+                maximumTrackTintColor="#E5E7EB"
+                thumbTintColor="#8B5CF6"
+                onValueChange={handleStressChange}
+              />
               <Text style={styles.stressValue}>{stressLevel}/10</Text>
             </View>
           </View>
