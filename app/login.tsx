@@ -1,6 +1,4 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { auth } from '../lib/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -16,14 +14,10 @@ export default function LoginScreen() {
       return;
     }
     setLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
+    setTimeout(() => {
       router.replace('/(tabs)');
-    } catch (error: any) {
-      Alert.alert('Sign In Error', error.message || 'Sign in failed. Please try again.');
-    } finally {
       setLoading(false);
-    }
+    }, 800);
   };
 
   const goToSignUp = () => {

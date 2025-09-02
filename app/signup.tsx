@@ -1,6 +1,4 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { auth } from '../lib/firebase';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -17,16 +15,11 @@ export default function SignUpScreen() {
       return;
     }
     setLoading(true);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, { displayName: name });
+    setTimeout(() => {
       Alert.alert('Success', 'Account created!');
       router.replace('/login');
-    } catch (error: any) {
-      Alert.alert('Sign Up Error', error.message || 'Sign up failed. Please try again.');
-    } finally {
       setLoading(false);
-    }
+    }, 800);
   };
 
   const goToSignIn = () => {

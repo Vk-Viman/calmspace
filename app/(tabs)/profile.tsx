@@ -4,6 +4,12 @@ import React, { useState } from 'react';
 import { Alert, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function ProfileRoute() {
+  // Save profile edits
+  const saveProfile = () => {
+    setProfile(editProfile);
+    setIsEditMode(false);
+    Alert.alert('Profile Updated', 'Your changes have been saved.');
+  };
   const [profile, setProfile] = useState({
     fullName: 'Kavinda',
     email: 'kavinda@example.com',
